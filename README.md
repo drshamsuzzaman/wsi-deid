@@ -18,6 +18,14 @@ If a re-identification key is retained, the output should be described as pseudo
 
 Human QC and local ethics/institutional review remain necessary before sharing slides.
 
+## Simplest CLI Example
+
+```bash
+wsi-deid export --input "path/to/slide.ndpi" --output-dir "path/to/clean_output"
+```
+
+The default export is lossless (`deflate`) and writes a clean `.ome.tif`, a pseudonym key CSV, QC images, and a JSON report.
+
 ## Quick Start for Pathologists
 
 Use this route if you want to process a folder of WSI files without writing code.
@@ -141,88 +149,63 @@ Screenshots in this repository should use only synthetic examples or fully de-id
 
 ## Platform Setup
 
-### Windows
+Install Python 3.10 or newer, install native OpenSlide where needed, then install WSI DeID from the repository folder.
 
-Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/windows/) or the Microsoft Store.
+### 1. Install Python and OpenSlide
 
-Then from the repository folder:
+Windows:
 
-```powershell
-python -m pip install --editable .
-```
+- Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/windows/) or the Microsoft Store.
+- No separate OpenSlide install is usually needed because `openslide-bin` is installed automatically on Windows.
 
-On Windows, `openslide-bin` is installed automatically by this package to provide the native OpenSlide library.
+macOS:
 
-If `jupyter` is not installed:
-
-```bash
-python -m pip install notebook
-```
-
-Open the notebook:
-
-```powershell
-python -m notebook tools\wsi_deid_batch_export.ipynb
-```
-
-### macOS
-
-Install Python 3.10 or newer. If you use Homebrew:
+- Install Python and OpenSlide with Homebrew:
 
 ```bash
-brew install python
+brew install python openslide
 ```
 
-Install the native OpenSlide library:
+Linux:
 
-```bash
-brew install openslide
-```
-
-From the repository folder:
-
-```bash
-python -m pip install --editable .
-```
-
-If `jupyter` is not installed:
-
-```bash
-python -m pip install notebook
-```
-
-Open the notebook:
-
-```bash
-python -m notebook tools/wsi_deid_batch_export.ipynb
-```
-
-### Linux
-
-Install Python 3.10 or newer and OpenSlide.
-
-On Ubuntu/Debian:
+- On Ubuntu/Debian:
 
 ```bash
 sudo apt-get update
 sudo apt-get install python3 python3-pip openslide-tools libopenslide0
 ```
 
+### 2. Install WSI DeID
+
 From the repository folder:
+
+```bash
+python -m pip install --editable .
+```
+
+On some Linux systems, use:
 
 ```bash
 python3 -m pip install --editable .
 ```
 
-If `jupyter` is not installed:
+### 3. Install and Open Jupyter
+
+```bash
+python -m pip install notebook
+python -m notebook tools/wsi_deid_batch_export.ipynb
+```
+
+On Windows, this path style also works:
+
+```powershell
+python -m notebook tools\wsi_deid_batch_export.ipynb
+```
+
+On some Linux systems, use:
 
 ```bash
 python3 -m pip install notebook
-```
-
-Open the notebook:
-
-```bash
 python3 -m notebook tools/wsi_deid_batch_export.ipynb
 ```
 
@@ -276,6 +259,21 @@ The clean output is a tiled pyramidal TIFF/OME-style derivative. Try opening it 
 - napari with suitable TIFF/OME plugins
 - other OME-TIFF or pyramidal TIFF-aware viewers
 
+## Development
+
+Install development dependencies:
+
+```bash
+python -m pip install --editable ".[dev]"
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+The current test suite uses synthetic images and does not require patient WSI data.
 
 
 ## Development Status
