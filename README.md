@@ -18,6 +18,62 @@ If a re-identification key is retained, the output should be described as pseudo
 
 Human QC and local ethics/institutional review remain necessary before sharing slides.
 
+## Quick Start for Pathologists
+
+Use this route if you want to process a folder of WSI files without writing code.
+
+### Option A: Download Without Git
+
+1. Open the repository page.
+2. Click **Code**.
+3. Click **Download ZIP**.
+4. Extract the ZIP file.
+5. Open a terminal/command prompt in the extracted folder.
+6. Install the tool:
+
+```bash
+python -m pip install -e .
+```
+
+7. Open the batch notebook:
+
+```text
+tools/wsi_deid_batch_export.ipynb
+```
+
+8. Change `INPUT_DIR` to the folder containing your WSI files.
+9. Run the notebook cells from top to bottom.
+10. Review the QC images before sharing the clean WSI outputs.
+
+### Option B: Clone With Git
+
+```bash
+git clone https://github.com/drshamsuzzaman/wsi-deid.git
+cd wsi-deid
+python -m pip install -e .
+jupyter notebook tools/wsi_deid_batch_export.ipynb
+```
+
+In the notebook, change:
+
+```python
+INPUT_DIR = Path(r"C:\Users\YourName\Desktop\slides")
+```
+
+to the folder containing your slides.
+
+The notebook creates:
+
+```text
+wsi_deid_clean_YYYYMMDD_HHMMSS/
+  WSI_000001.ome.tif
+  WSI_000002.ome.tif
+  pseudonym_key.csv
+  qc/
+```
+
+Keep `pseudonym_key.csv` secure and separate from shared outputs.
+
 ## What It Does
 
 - Reads WSI files supported by OpenSlide, including many `.ndpi`, `.svs`, `.scn`, `.mrxs`, `.tif`, and `.tiff` files.
@@ -34,7 +90,45 @@ Human QC and local ethics/institutional review remain necessary before sharing s
 
 
 
-## Install
+## Platform Setup
+
+### Windows
+
+Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/windows/) or the Microsoft Store.
+
+Then from the repository folder:
+
+```powershell
+python -m pip install -e .
+```
+
+On Windows, `openslide-bin` is installed automatically by this package to provide the native OpenSlide library.
+
+If `jupyter` is not installed:
+
+```bash
+python -m pip install notebook
+```
+
+Open the notebook:
+
+```powershell
+python -m notebook tools\wsi_deid_batch_export.ipynb
+```
+
+### macOS
+
+Install Python 3.10 or newer. If you use Homebrew:
+
+```bash
+brew install python
+```
+
+Install the native OpenSlide library:
+
+```bash
+brew install openslide
+```
 
 From the repository folder:
 
@@ -42,9 +136,48 @@ From the repository folder:
 python -m pip install -e .
 ```
 
-On Windows, the project depends on `openslide-bin` to provide the native OpenSlide library.
+If `jupyter` is not installed:
 
-## Basic Use
+```bash
+python -m pip install notebook
+```
+
+Open the notebook:
+
+```bash
+python -m notebook tools/wsi_deid_batch_export.ipynb
+```
+
+### Linux
+
+Install Python 3.10 or newer and OpenSlide.
+
+On Ubuntu/Debian:
+
+```bash
+sudo apt-get update
+sudo apt-get install python3 python3-pip openslide-tools libopenslide0
+```
+
+From the repository folder:
+
+```bash
+python3 -m pip install -e .
+```
+
+If `jupyter` is not installed:
+
+```bash
+python3 -m pip install notebook
+```
+
+Open the notebook:
+
+```bash
+python3 -m notebook tools/wsi_deid_batch_export.ipynb
+```
+
+## Command-Line Use
 
 ```bash
 wsi-deid export ^
@@ -60,6 +193,15 @@ compression = deflate
 ```
 
 JPEG export is available only as an explicit opt-in and is not recommended when pathology information must be preserved without compression loss.
+
+On macOS/Linux, use backslashes for line continuation and normal Unix-style paths:
+
+```bash
+wsi-deid export \
+  --input "/path/to/B-300-26.ndpi" \
+  --output-dir "/path/to/wsi_deid_clean" \
+  --study-id WSI_000001
+```
 
 ## Outputs
 
