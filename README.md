@@ -334,4 +334,3 @@ Planned next steps:
 - encrypted key storage
 - formal QC report
 - viewer compatibility testing
-- JOSS/SoftwareX-ready documentation and tests
