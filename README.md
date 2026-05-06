@@ -24,7 +24,7 @@ Human QC and local ethics/institutional review remain necessary before sharing s
 wsi-deid export --input "path/to/slide.ndpi" --output-dir "path/to/clean_output"
 ```
 
-The default export is lossless (`deflate`) and writes a clean `.ome.tif`, a pseudonym key CSV, QC images, and a JSON report.
+The default export is lossless (`deflate`) and writes a clean tiled pyramidal `.ome.tif`, a pseudonym key CSV, QC images, and a JSON report.
 
 ## Quick Start for Pathologists
 
@@ -103,6 +103,7 @@ The clean derivative is designed to remove or avoid the most common WSI identifi
 - Original filename is replaced by a pseudonymous study ID.
 - Original vendor metadata is not copied into the clean derivative.
 - Only minimal clean metadata is written.
+- Non-identifying image calibration, such as microns-per-pixel when available from the source slide, is rewritten in clean TIFF resolution fields.
 - Original associated macro/label images are not embedded in the clean derivative.
 - Separate QC images are generated so the user can check whether label/barcode and handwritten/scratch-number regions were blocked.
 - Label associated images, when present, are blanked in QC.
@@ -118,6 +119,7 @@ Current limitations:
 - A re-identification key CSV is created; if retained, the workflow is pseudonymisation/de-identification, not anonymisation.
 - Clean output is currently `.ome.tif` / tiled pyramidal TIFF, not rewritten `.ndpi`.
 - Proprietary vendor formats may contain private metadata fields that are not fully interpretable by open-source readers.
+- If the source slide does not expose microns-per-pixel metadata, the clean output may not contain usable physical calibration.
 - Rare diagnoses, dates, linked clinical data, or unusual tissue patterns may still create re-identification risk outside the WSI file itself.
 - Automatic macro masking must be reviewed by a human before sharing outputs.
 - Viewer compatibility may vary across platforms and WSI viewers.
@@ -209,6 +211,28 @@ python3 -m pip install notebook
 python3 -m notebook tools/wsi_deid_batch_export.ipynb
 ```
 
+## Kaggle Use
+
+If using Kaggle, clone the public repository into `/kaggle/working`:
+
+```python
+!git clone https://github.com/drshamsuzzaman/wsi-deid.git
+```
+
+Then point Python directly to the source folder:
+
+```python
+import sys
+sys.path.insert(0, "/kaggle/working/wsi-deid/src")
+
+from pathlib import Path
+from wsi_deid.export import export_clean_wsi
+```
+
+Kaggle input datasets are usually under `/kaggle/input`, and outputs should be written under `/kaggle/working`.
+
+Do not upload identifiable patient WSI data to Kaggle unless you have appropriate permission, ethics approval, and data governance clearance.
+
 ## Command-Line Use
 
 ```bash
@@ -226,7 +250,7 @@ compression = deflate
 
 JPEG export is available only as an explicit opt-in and is not recommended when pathology information must be preserved without compression loss.
 
-On macOS/Linux, use backslashes for line continuation and normal Unix-style paths:
+On macOS/Linux, use a backslash for line continuation and normal Unix-style paths:
 
 ```bash
 wsi-deid export \
@@ -252,7 +276,7 @@ Store `pseudonym_key.csv` separately from shared WSI outputs, ideally encrypted 
 
 ## Verifying Pyramid Levels
 
-The clean output is written as a tiled TIFF pyramid using TIFF SubIFDs. Some OpenSlide builds may report `openslide.level-count: 1` for generic TIFF/OME-TIFF derivatives even when SubIFD pyramid levels are present. For this output format, verify pyramid levels with `tifffile` or a Bio-Formats/OME-aware viewer.
+The clean output is written as a tiled TIFF pyramid using TIFF SubIFDs. Some OpenSlide builds may report `openslide.level-count: 1` for generic TIFF derivatives even when SubIFD pyramid levels are present. For this output format, verify pyramid levels with `tifffile` or a Bio-Formats/OME-aware viewer.
 
 Python check:
 
@@ -275,7 +299,7 @@ Each `WSI_*.json` report in the QC folder also records `output_pyramid.level_cou
 
 ## Viewers
 
-The clean output is a tiled pyramidal TIFF/OME-style derivative. Try opening it with:
+The clean output is a tiled pyramidal TIFF derivative using an `.ome.tif` filename. Try opening it with:
 
 - QuPath
 - Fiji/ImageJ with Bio-Formats
@@ -297,7 +321,6 @@ pytest
 ```
 
 The current test suite uses synthetic images and does not require patient WSI data.
-
 
 ## Development Status
 
