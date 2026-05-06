@@ -88,6 +88,55 @@ Keep `pseudonym_key.csv` secure and separate from shared outputs.
 - Writes minimal clean metadata.
 - Saves before/mask/after QC images and a JSON processing report.
 
+## What Is Removed or Changed
+
+The clean derivative is designed to remove or avoid the most common WSI identifier locations:
+
+- Original filename is replaced by a pseudonymous study ID.
+- Original vendor metadata is not copied into the clean derivative.
+- Only minimal clean metadata is written.
+- Original associated macro/label images are not embedded in the clean derivative.
+- Separate QC images are generated so the user can check whether label/barcode and handwritten/scratch-number regions were blocked.
+- Label associated images, when present, are blanked in QC.
+- Macro/overview associated images, when present, are redacted in QC by masking the barcode/label end and the opposite handwritten/scratch end.
+
+## What Is Not Guaranteed
+
+This tool does not guarantee legal anonymisation or complete removal of all re-identification risk.
+
+Current limitations:
+
+- The source WSI file is not modified.
+- A re-identification key CSV is created; if retained, the workflow is pseudonymisation/de-identification, not anonymisation.
+- Clean output is currently `.ome.tif` / tiled pyramidal TIFF, not rewritten `.ndpi`.
+- Proprietary vendor formats may contain private metadata fields that are not fully interpretable by open-source readers.
+- Rare diagnoses, dates, linked clinical data, or unusual tissue patterns may still create re-identification risk outside the WSI file itself.
+- Automatic macro masking must be reviewed by a human before sharing outputs.
+- Viewer compatibility may vary across platforms and WSI viewers.
+
+Use local ethics, institutional, and data-sharing review before external release.
+
+## QC Example
+
+The tool writes QC images for each processed slide:
+
+```text
+qc/
+  WSI_000001_macro_before.png
+  WSI_000001_macro_mask.png
+  WSI_000001_macro_after.png
+  WSI_000001_report.json
+```
+
+Before sharing clean WSI files, review the QC images and confirm:
+
+- barcode/label regions are fully blocked
+- handwritten/scratch-number regions are fully blocked
+- diagnostic tissue is not blocked
+- no patient or institution identifiers remain visible in QC outputs intended for sharing
+
+Screenshots in this repository should use only synthetic examples or fully de-identified images. Do not upload real patient labels, accession numbers, barcodes, or identifiable institutional labels into the public repository.
+
 
 
 ## Platform Setup
