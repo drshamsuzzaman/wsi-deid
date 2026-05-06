@@ -250,6 +250,29 @@ wsi_deid_clean/
 
 Store `pseudonym_key.csv` separately from shared WSI outputs, ideally encrypted and access-controlled.
 
+## Verifying Pyramid Levels
+
+The clean output is written as a tiled TIFF pyramid using TIFF SubIFDs. Some OpenSlide builds may report `openslide.level-count: 1` for generic TIFF/OME-TIFF derivatives even when SubIFD pyramid levels are present. For this output format, verify pyramid levels with `tifffile` or a Bio-Formats/OME-aware viewer.
+
+Python check:
+
+```python
+import tifffile
+
+path = "wsi_deid_clean/WSI_000001.ome.tif"
+
+with tifffile.TiffFile(path) as tif:
+    series = tif.series[0]
+    print("Pyramid levels:", len(series.levels))
+    for i, level in enumerate(series.levels):
+        page = level.pages[0]
+        print(i, level.shape, "tiled:", page.is_tiled, "compression:", page.compression.name)
+```
+
+Expected output should show multiple levels, commonly 5-10 levels depending on the source slide and export settings.
+
+Each `WSI_*.json` report in the QC folder also records `output_pyramid.level_count`.
+
 ## Viewers
 
 The clean output is a tiled pyramidal TIFF/OME-style derivative. Try opening it with:

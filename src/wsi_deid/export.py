@@ -143,6 +143,26 @@ def write_report(report_path: Path, data: dict) -> None:
     report_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
+def inspect_tiff_pyramid(tiff_path: Path) -> dict:
+    """Inspect pyramid levels using tifffile, which understands TIFF SubIFDs."""
+    levels = []
+    with tifffile.TiffFile(tiff_path) as tif:
+        if not tif.series:
+            return {"level_count": 0, "levels": []}
+        series = tif.series[0]
+        for index, level in enumerate(series.levels):
+            page = level.pages[0]
+            levels.append(
+                {
+                    "index": index,
+                    "shape": list(level.shape),
+                    "is_tiled": bool(page.is_tiled),
+                    "compression": page.compression.name,
+                }
+            )
+    return {"level_count": len(levels), "levels": levels}
+
+
 def export_clean_wsi(
     source: Path,
     output_dir: Path,
@@ -183,6 +203,7 @@ def export_clean_wsi(
         compression=compression,
         jpeg_quality=jpeg_quality,
     )
+    pyramid_info = inspect_tiff_pyramid(output_path)
     report = {
         "study_id": study_id,
         "source_path": str(source.resolve()),
@@ -190,6 +211,7 @@ def export_clean_wsi(
         "source_format": slide.properties.get("openslide.vendor", ""),
         "level_dimensions": list(slide.level_dimensions),
         "written_levels": written_levels,
+        "output_pyramid": pyramid_info,
         "macro_redaction": macro_info,
         "metadata_policy": "Only minimal clean derivative metadata written. Vendor metadata and associated images omitted.",
         "created_at": datetime.now().isoformat(timespec="seconds"),
@@ -198,6 +220,7 @@ def export_clean_wsi(
 
     append_key_row(key_csv, source, output_path, study_id)
     write_report(qc_dir / f"{study_id}_report.json", report)
+    print("Verified TIFF pyramid levels:", pyramid_info["level_count"])
     return {
         "study_id": study_id,
         "output_path": output_path,
