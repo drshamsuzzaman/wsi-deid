@@ -7,6 +7,6 @@ authors:
   - family-names: "Zaman"
     given-names: "Shamsuz"
     name-particle: "Dr."
-    affiliation: "ICMR-Centre for Cancer Pathology, New Delhi 
+    affiliation: "ICMR-Centre for Cancer Pathology, New Delhi "
 repository-code: "https://github.com/drshamsuzzaman/wsi-deid"
 license: MIT
