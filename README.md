@@ -32,7 +32,7 @@ Use this route if you want to process a folder of WSI files without writing code
 6. Install the tool:
 
 ```bash
-python -m pip install -e .
+python -m pip install --editable .
 ```
 
 7. Open the batch notebook:
@@ -50,7 +50,7 @@ tools/wsi_deid_batch_export.ipynb
 ```bash
 git clone https://github.com/drshamsuzzaman/wsi-deid.git
 cd wsi-deid
-python -m pip install -e .
+python -m pip install --editable .
 jupyter notebook tools/wsi_deid_batch_export.ipynb
 ```
 
@@ -99,7 +99,7 @@ Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/
 Then from the repository folder:
 
 ```powershell
-python -m pip install -e .
+python -m pip install --editable .
 ```
 
 On Windows, `openslide-bin` is installed automatically by this package to provide the native OpenSlide library.
@@ -133,7 +133,7 @@ brew install openslide
 From the repository folder:
 
 ```bash
-python -m pip install -e .
+python -m pip install --editable .
 ```
 
 If `jupyter` is not installed:
@@ -162,7 +162,7 @@ sudo apt-get install python3 python3-pip openslide-tools libopenslide0
 From the repository folder:
 
 ```bash
-python3 -m pip install -e .
+python3 -m pip install --editable .
 ```
 
 If `jupyter` is not installed:
