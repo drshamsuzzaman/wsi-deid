@@ -13,6 +13,22 @@ from .pseudonym import append_key_row, make_study_id
 from .redaction import redact_slide_ends
 
 
+def tiff_resolution_from_mpp(slide: openslide.OpenSlide) -> tuple[tuple[float, float] | None, str | None]:
+    """Return TIFF resolution as pixels per centimeter from OpenSlide MPP metadata."""
+    mpp_x = slide.properties.get("openslide.mpp-x")
+    mpp_y = slide.properties.get("openslide.mpp-y")
+    if not mpp_x or not mpp_y:
+        return None, None
+
+    try:
+        x_pixels_per_cm = 10000.0 / float(mpp_x)
+        y_pixels_per_cm = 10000.0 / float(mpp_y)
+    except ValueError:
+        return None, None
+
+    return (x_pixels_per_cm, y_pixels_per_cm), "CENTIMETER"
+
+
 def save_macro_qc(
     slide: openslide.OpenSlide,
     qc_dir: Path,
@@ -92,6 +108,7 @@ def write_pyramidal_tiff(
     }
 
     with tifffile.TiffWriter(output_path, bigtiff=True) as tif:
+        resolution, resolutionunit = tiff_resolution_from_mpp(slide)
         for i, level in enumerate(levels):
             width, height = slide.level_dimensions[level]
             options = {
@@ -103,6 +120,13 @@ def write_pyramidal_tiff(
                 "metadata": None,
                 "description": json.dumps(clean_description) if i == 0 else None,
             }
+            if resolution is not None and resolutionunit is not None:
+                downsample = slide.level_downsamples[level]
+                options["resolution"] = (
+                    resolution[0] / downsample,
+                    resolution[1] / downsample,
+                )
+                options["resolutionunit"] = resolutionunit
             if i == 0 and len(levels) > 1:
                 options["subifds"] = len(levels) - 1
             if i > 0:
